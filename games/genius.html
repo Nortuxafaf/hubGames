@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>GENIUS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;700&family=Plus+Jakarta+Sans:wght@200;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #0a0e27;
+      color: #ffffff;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      position: fixed;
+      overflow: hidden;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      display: flex;
+    }
+
+    /* Screen Manager */
+    .screen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateX(50px);
+      will-change: opacity, transform;
+    }
+
+    .screen.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    .screen.exit {
+      transform: translateX(-50px);
+    }
+
+    /* ============ SCREEN 1: DIFFICULTY ============ */
+    #difficultyScreen {
+      gap: 24px;
+      justify-content: center;
+    }
+
+    .screen-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .screen-title {
+      font-size: 52px;
+      font-weight: 700;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: 8px;
+      animation: titlePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes titlePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    .screen-subtitle {
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+.start-button {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.2));
+      border: 1.5px solid rgba(99, 102, 241, 0.6);
+      border-radius: 12px;
+      color: #a78bfa;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      position: relative;
+      overflow: hidden;
+      margin-top: 12px;
+      -webkit-tap-highlight-color: transparent;
+      will-change: transform, box-shadow;
+    }
+
+    .start-button:active {
+      transform: scale(0.96);
+      box-shadow: 0 0 25px rgba(167, 139, 250, 0.3);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.3));
+    }
+
+    /* ============ SCREEN 2: GAME ============ */
+    #gameScreen {
+      gap: 14px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px;
+    }
+
+    .game-header {
+      text-align: center;
+      padding: 8px 0;
+      flex-shrink: 0;
+    }
+
+    .game-title {
+      font-size: 44px;
+      font-weight: 700;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: 4px;
+      animation: titlePulse 2s ease-in-out infinite;
+    }
+
+    .game-subtitle {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Players Section */
+    .players-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .player-card {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 12px;
+      padding: 12px 10px;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      will-change: transform, box-shadow;
+    }
+
+    .player-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+      transition: none;
+      pointer-events: none;
+    }
+
+    .player-card.active {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%);
+      border-color: rgba(99, 102, 241, 0.6);
+      transform: scale(1.03);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
+    }
+
+    .player-name {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 4px;
+    }
+
+    .player-score {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .player-status {
+      font-size: 9px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .player-card.active .player-status {
+      color: #6366f1;
+      font-weight: 600;
+    }
+
+    /* Game Board */
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      flex-shrink: 0;
+      aspect-ratio: 1;
+      min-height: 260px;
+    }
+
+    .color-button {
+      position: relative;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: box-shadow 0.1s ease, transform 0.1s ease;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      -webkit-tap-highlight-color: transparent;
+      will-change: transform, box-shadow;
+    }
+
+    .color-button::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.1s ease;
+      pointer-events: none;
+    }
+
+    .color-button:active:not(:disabled)::before {
+      opacity: 1;
+    }
+
+    .color-button:disabled {
+      cursor: not-allowed;
+      filter: brightness(0.5);
+      pointer-events: none;
+    }
+
+    /* Red Button */
+    .color-button.red {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+    }
+
+    .color-button.red:active:not(:disabled) {
+      background: linear-gradient(135deg, #ff5a5a 0%, #ff4444 100%);
+      box-shadow: 0 0 40px rgba(239, 68, 68, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.3);
+      transform: scale(0.93);
+      filter: brightness(1.15);
+    }
+
+    .color-button.red.active {
+      background: linear-gradient(135deg, #ff5a5a 0%, #ff4444 100%);
+      box-shadow: 0 0 40px rgba(239, 68, 68, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.3);
+      transform: scale(0.93);
+      filter: brightness(1.15);
+    }
+
+    /* Blue Button */
+    .color-button.blue {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+    }
+
+    .color-button.blue:active:not(:disabled) {
+      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.3);
+      transform: scale(0.93);
+      filter: brightness(1.15);
+    }
+
+    .color-button.blue.active {
+      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.3);
+      transform: scale(0.93);
+      filter: brightness(1.15);
+    }
+
+    /* Yellow Button */
+    .color-button.yellow {
+      background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4);
+      color: #1f2937;
+    }
+
+    .color-button.yellow:active:not(:disabled) {
+      background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
+      box-shadow: 0 0 40px rgba(251, 191, 36, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.4);
+      transform: scale(0.93);
+      filter: brightness(1.15);
+      color: #0f172a;
+    }
+
+    .color-button.yellow.active {
+      background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
+      box-shadow: 0 0 40px rgba(251, 191, 36, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.4);
+      transform: scale(0.93);
+      filter: brightness(1.15);
+      color: #0f172a;
+    }
+
+    /* Green Button */
+    .color-button.green {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+    }
+
+    .color-button.green:active:not(:disabled) {
+      background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+      box-shadow: 0 0 40px rgba(16, 185, 129, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.3);
+      transform: scale(0.93);
+      filter: brightness(1.15);
+    }
+
+    .color-button.green.active {
+      background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+      box-shadow: 0 0 40px rgba(16, 185, 129, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.3);
+      transform: scale(0.93);
+      filter: brightness(1.15);
+    }
+
+    /* Status Message */
+    .status-box {
+      background: rgba(99, 102, 241, 0.05);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 10px;
+      padding: 12px 10px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.8);
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.3px;
+      flex-shrink: 0;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      flex-shrink: 0;
+      padding-bottom: 8px;
+    }
+
+    .action-btn {
+      padding: 12px 10px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.05));
+      border: 1.5px solid rgba(99, 102, 241, 0.3);
+      border-radius: 8px;
+      color: #6366f1;
+      font-weight: 600;
+      font-size: 11px;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      position: relative;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      will-change: transform, box-shadow;
+    }
+
+    .action-btn:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+    }
+
+    .action-btn.back {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .action-btn.back:active {
+      border-color: rgba(239, 68, 68, 0.6);
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+    }
+
+    /* Tablet adjustments */
+    @media (min-width: 768px) {
+      .screen {
+        padding: 24px;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .screen-title,
+      .game-title {
+        font-size: 56px;
+      }
+
+      .board {
+        min-height: 320px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SCREEN 1: DIFFICULTY SELECTION -->
+  <div class="screen active" id="difficultyScreen">
+    <div class="screen-header">
+      <div class="screen-title">GENIUS</div>
+      <div class="screen-subtitle">Jogo de Sequência de Memória</div>
+    </div>
+
+    <button class="start-button" id="startGameBtn">Bora Jogar 🎮</button>
+  </div>
+
+  <!-- SCREEN 2: GAME -->
+  <div class="screen" id="gameScreen">
+    <div class="game-header">
+      <div class="game-title">GENIUS</div>
+      <div class="game-subtitle" id="difficultyBadge">Desafio Extremo</div>
+    </div>
+
+    <div class="players-section">
+      <div class="player-card active" id="player1Card">
+        <div class="player-name">J1</div>
+        <div class="player-score" id="p1Score">0</div>
+        <div class="player-status" id="p1Status">Sua vez</div>
+      </div>
+      <div class="player-card" id="player2Card">
+        <div class="player-name">J2</div>
+        <div class="player-score" id="p2Score">0</div>
+        <div class="player-status" id="p2Status">Aguardando</div>
+      </div>
+    </div>
+
+    <div class="board">
+      <button class="color-button red" id="red" data-color="red" disabled></button>
+      <button class="color-button blue" id="blue" data-color="blue" disabled></button>
+      <button class="color-button yellow" id="yellow" data-color="yellow" disabled></button>
+      <button class="color-button green" id="green" data-color="green" disabled></button>
+    </div>
+
+    <div class="status-box" id="statusMessage">
+      🎮 Selecione dificuldade e comece
+    </div>
+
+    <div class="action-buttons">
+      <button class="action-btn" id="backBtn">Voltar</button>
+      <button class="action-btn" id="resetBtn">Recomeçar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const colors = ['red', 'blue', 'yellow', 'green'];
+  let gameSequence = [];
+  let playerSequence = [];
+  let currentPlayer = 1;
+  let isPlayingSequence = false;
+  let gameActive = false;
+  let delayTime = 600;
+  let selectedDifficulty = 'easy';
+
+  const buttonElements = {
+    red: document.getElementById('red'),
+    blue: document.getElementById('blue'),
+    yellow: document.getElementById('yellow'),
+    green: document.getElementById('green')
+  };
+
+  const scores = { 1: 0, 2: 0 };
+  let audioContext = null;
+
+  // Inicializar AudioContext na primeira interação
+  function initAudioContext() {
+    if (!audioContext) {
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (error) {
+        console.log('AudioContext não disponível');
+      }
+    }
+    return audioContext;
+  }
+
+  // Retomar o AudioContext se estiver suspenso
+  function resumeAudioContext() {
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+  }
+
+  // Set Hard as default
+  selectedDifficulty = 'hard';
+  delayTime = 300;
+
+  // Screen Navigation
+  function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => {
+      if (screen.id === screenId) {
+        screen.classList.remove('exit');
+        screen.classList.add('active');
+      } else {
+        screen.classList.remove('active');
+        screen.classList.add('exit');
+      }
+    });
+  }
+
+  document.getElementById('startGameBtn').addEventListener('click', () => {
+    initAudioContext();
+    resumeAudioContext();
+    document.getElementById('difficultyBadge').textContent = 'Desafio Extremo';
+    showScreen('gameScreen');
+    startNewGame();
+  });
+
+  // Back to Difficulty
+  document.getElementById('backBtn').addEventListener('click', () => {
+    resetGame();
+    showScreen('difficultyScreen');
+  });
+
+  // Game Functions
+  function updateUI() {
+    document.getElementById('p1Score').textContent = scores[1];
+    document.getElementById('p2Score').textContent = scores[2];
+
+    document.getElementById('player1Card').classList.toggle('active', currentPlayer === 1);
+    document.getElementById('player2Card').classList.toggle('active', currentPlayer === 2);
+
+    if (gameActive) {
+      if (currentPlayer === 1) {
+        document.getElementById('p1Status').textContent = 'Sua vez';
+        document.getElementById('p2Status').textContent = 'Aguardando';
+      } else {
+        document.getElementById('p1Status').textContent = 'Aguardando';
+        document.getElementById('p2Status').textContent = 'Sua vez';
+      }
+    }
+  }
+
+  function playSound(color) {
+    try {
+      const ctx = initAudioContext();
+      if (!ctx) return;
+
+      resumeAudioContext();
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      const frequencies = { red: 700, blue: 500, yellow: 900, green: 350 };
+      osc.frequency.value = frequencies[color];
+      osc.type = 'sine';
+
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.2);
+    } catch (error) {
+      console.log('Áudio não disponível');
+    }
+  }
+
+  function flashButton(color) {
+    const button = buttonElements[color];
+    button.classList.add('active');
+    playSound(color);
+    setTimeout(() => {
+      button.classList.remove('active');
+    }, 150);
+  }
+
+  function playSequence() {
+    isPlayingSequence = true;
+    gameSequence.forEach((color, index) => {
+      setTimeout(() => {
+        flashButton(color);
+      }, (index + 1) * (delayTime + 100));
+    });
+
+    setTimeout(() => {
+      isPlayingSequence = false;
+      playerSequence = [];
+      enableButtons();
+      updateStatus();
+    }, gameSequence.length * (delayTime + 100) + 500);
+  }
+
+  function updateStatus() {
+    const levelText = `Nível ${gameSequence.length}`;
+    if (isPlayingSequence) {
+      document.getElementById('statusMessage').textContent = '👀 Observando...';
+    } else {
+      document.getElementById('statusMessage').textContent = `${levelText} • Sua vez`;
+    }
+  }
+
+  function handleButtonClick(color) {
+    if (!gameActive || isPlayingSequence) return;
+
+    playerSequence.push(color);
+    flashButton(color);
+
+    if (playerSequence[playerSequence.length - 1] !== gameSequence[playerSequence.length - 1]) {
+      document.getElementById('statusMessage').textContent = '❌ Errou! Próximo jogador';
+      disableButtons();
+      switchPlayer();
+      return;
+    }
+
+    if (playerSequence.length === gameSequence.length) {
+      scores[currentPlayer]++;
+      document.getElementById('statusMessage').textContent = `✅ Acertou! +1 Ponto`;
+      disableButtons();
+
+      setTimeout(() => {
+        gameSequence.push(colors[Math.floor(Math.random() * colors.length)]);
+        updateUI();
+        playSequence();
+      }, 1200);
+    }
+  }
+
+  function switchPlayer() {
+    currentPlayer = currentPlayer === 1 ? 2 : 1;
+    updateUI();
+
+    setTimeout(() => {
+      if (gameActive) {
+        gameSequence = [];
+        playerSequence = [];
+        gameSequence.push(colors[Math.floor(Math.random() * colors.length)]);
+        playSequence();
+      }
+    }, 1800);
+  }
+
+  function enableButtons() {
+    colors.forEach(color => {
+      buttonElements[color].disabled = false;
+    });
+  }
+
+  function disableButtons() {
+    colors.forEach(color => {
+      buttonElements[color].disabled = true;
+    });
+  }
+
+  function startNewGame() {
+    gameSequence = [];
+    playerSequence = [];
+    currentPlayer = 1;
+    scores[1] = 0;
+    scores[2] = 0;
+    gameActive = true;
+    isPlayingSequence = false;
+
+    updateUI();
+    gameSequence.push(colors[Math.floor(Math.random() * colors.length)]);
+
+    setTimeout(() => {
+      playSequence();
+    }, 500);
+  }
+
+  function resetGame() {
+    gameActive = false;
+    gameSequence = [];
+    playerSequence = [];
+    disableButtons();
+    scores[1] = 0;
+    scores[2] = 0;
+    updateUI();
+    document.getElementById('statusMessage').textContent = '🎮 Selecione dificuldade e comece';
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    resetGame();
+    startNewGame();
+  });
+
+  colors.forEach(color => {
+    buttonElements[color].addEventListener('click', () => {
+      if (gameActive && !isPlayingSequence) {
+        handleButtonClick(color);
+      }
+    });
+  });
+
+  updateUI();
+</script>
+
+</body>
+</html>

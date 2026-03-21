@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1976d2">
+<title>CARA A CARA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+:root{
+  --bg:#0d47a1; --surface:#1565c0; --card:#1976d2; --border:#42a5f5;
+  --gold:#ffd700; --gold-dim:#ffd70044; --red:#f44336; --green:#4caf50;
+  --text:#fff; --muted:#90caf9; --elim-bg:#0a2a5a;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);overflow:hidden;}
+
+#rotate-overlay{display:none;position:fixed;inset:0;background:#0d47a1;z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+#rotate-overlay.show{display:flex;}
+.rotate-icon{font-size:4.5rem;animation:rotAnim 2.2s ease-in-out infinite;}
+@keyframes rotAnim{0%{transform:rotate(0);}40%{transform:rotate(90deg);}60%{transform:rotate(90deg);}100%{transform:rotate(0);}}
+.rotate-msg{font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--gold);text-align:center;line-height:1.4;}
+.rotate-sub{font-size:.75rem;color:var(--muted);}
+
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .3s,transform .3s;}
+.screen.hidden{opacity:0;pointer-events:none;transform:scale(0.97);}
+
+/* START */
+#screen-start{padding:20px;gap:0;background:linear-gradient(160deg,#1565c0,#0d47a1);}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(2rem,8vw,3.2rem);color:var(--gold);text-shadow:0 0 30px #ffd70066,0 4px 0 #8a6000;text-align:center;}
+.logo-sub{font-size:.65rem;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:16px;}
+.secret-box{background:rgba(255,255,255,0.12);border:2px solid var(--gold);border-radius:20px;padding:16px 20px;width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 0 30px var(--gold-dim);margin-bottom:16px;backdrop-filter:blur(4px);}
+.secret-lbl{font-family:'Fredoka One',cursive;font-size:.7rem;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;}
+.secret-face-wrap{width:120px;height:120px;background:#5eb8ff;border:3px solid var(--gold);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px var(--gold-dim);animation:sPulse 2.5s ease-in-out infinite;overflow:hidden;}
+.secret-face-wrap svg{width:108px;height:108px;}
+@keyframes sPulse{0%,100%{box-shadow:0 0 16px var(--gold-dim);}50%{box-shadow:0 0 36px #ffd70066;}}
+.secret-char-name{font-family:'Fredoka One',cursive;font-size:.95rem;color:var(--gold);}
+.secret-note{font-size:.68rem;color:var(--muted);text-align:center;line-height:1.7;}
+.secret-note strong{color:#ffcc02;}
+.btn-primary{width:100%;max-width:360px;padding:16px;background:linear-gradient(135deg,#ff6b35,#f44336);border:none;border-radius:16px;font-family:'Fredoka One',cursive;font-size:1.1rem;color:#fff;cursor:pointer;touch-action:manipulation;box-shadow:0 6px 0 #b71c1c,0 0 24px #f4433655;transition:transform .08s,box-shadow .08s;text-transform:uppercase;}
+.btn-primary:active{transform:translateY(4px);box-shadow:0 2px 0 #b71c1c;}
+.btn-ghost{margin-top:10px;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.3);border-radius:12px;padding:11px 28px;font-family:'Nunito',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--muted);cursor:pointer;touch-action:manipulation;text-transform:uppercase;transition:all .2s;}
+.btn-ghost:active{border-color:var(--gold);color:var(--gold);}
+
+/* GAME */
+#screen-game{flex-direction:row;padding:0;overflow:hidden;justify-content:flex-start;align-items:stretch;}
+.side-panel{width:90px;min-width:82px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:8px 5px;background:rgba(0,0,0,0.25);border-right:2px solid rgba(255,255,255,0.15);flex-shrink:0;gap:5px;}
+.game-logo{font-family:'Fredoka One',cursive;font-size:.75rem;color:var(--gold);text-align:center;line-height:1.2;}
+.panel-secret-card{background:rgba(255,255,255,0.12);border:2px solid var(--gold);border-radius:10px;padding:6px 4px;width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;box-shadow:0 0 10px var(--gold-dim);}
+.panel-secret-lbl{font-size:.4rem;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;font-weight:900;}
+.panel-secret-svg{width:58px;height:58px;overflow:hidden;border-radius:8px;background:#5eb8ff;display:flex;align-items:center;justify-content:center;}
+.panel-secret-svg svg{width:54px;height:54px;}
+.panel-secret-name{font-family:'Fredoka One',cursive;font-size:.4rem;color:var(--gold);text-align:center;}
+.counter-block{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.counter-lbl{font-size:.38rem;color:var(--muted);text-transform:uppercase;font-weight:900;letter-spacing:.1em;}
+.counter-val{font-family:'Fredoka One',cursive;font-size:1.5rem;color:#76ff03;text-shadow:0 0 12px #76ff0366;line-height:1;}
+.counter-of{font-size:.4rem;color:var(--muted);}
+.btn-win-side{width:100%;padding:10px 3px;background:linear-gradient(135deg,#76ff03,#64dd17);border:none;border-radius:10px;font-family:'Fredoka One',cursive;font-size:.5rem;color:#1a3300;cursor:pointer;touch-action:manipulation;box-shadow:0 4px 0 #1b5e20,0 0 16px #76ff0344;transition:transform .08s;text-transform:uppercase;line-height:1.5;text-align:center;animation:winPulse 2s ease-in-out infinite;}
+@keyframes winPulse{0%,100%{box-shadow:0 4px 0 #1b5e20,0 0 10px #76ff0344;}50%{box-shadow:0 4px 0 #1b5e20,0 0 24px #76ff0388;}}
+.btn-win-side:active{transform:translateY(3px);box-shadow:0 1px 0 #1b5e20;}
+.btn-menu-side{width:100%;padding:7px 3px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:8px;font-size:.38rem;font-weight:900;color:var(--muted);cursor:pointer;touch-action:manipulation;text-transform:uppercase;}
+.btn-menu-side:active{color:#fff;border-color:#fff;}
+
+.board-area{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:6px 7px;gap:5px;}
+.board-hint{font-family:'Fredoka One',cursive;font-size:.52rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0;}
+
+.face-grid{flex:1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(3,1fr);gap:5px;overflow:hidden;max-width:100%;}
+
+.face-card{background:#5eb8ff;border:2px solid #1e88e5;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;transition:border-color .15s,opacity .2s,transform .1s;position:relative;overflow:hidden;padding:0;}
+.face-card:not(.elim):active{transform:scale(0.91);}
+.face-card svg{width:100%;height:auto;max-height:calc(100% - 16px);display:block;}
+.face-card-name{font-family:'Fredoka One',cursive;font-size:clamp(.26rem,.85vw,.46rem);color:#1a3a6a;letter-spacing:.02em;text-align:center;line-height:1;background:rgba(255,255,255,0.7);width:100%;padding:1px 0;border-radius:0 0 6px 6px;flex-shrink:0;}
+.face-card.elim{background:#0a2244;border-color:#1a3a6a;cursor:default;}
+.face-card.elim svg,.face-card.elim .face-card-name{opacity:.08;}
+.face-card.elim::after{content:'✕';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(3rem,12vw,5rem);color:var(--red);font-weight:900;font-family:'Fredoka One',cursive;text-shadow:0 0 20px var(--red),0 0 40px var(--red);}
+
+/* STATE BADGE */
+.state-badge{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;}
+.state-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);transition:all .3s;}
+.state-dot.active{background:var(--gold);border-color:var(--gold);box-shadow:0 0 6px var(--gold);}
+.state-lbl{font-size:.32rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:900;text-align:center;}
+
+.state-badge-start{display:flex;flex-direction:column;align-items:center;gap:5px;margin-top:8px;}
+.state-dots-start{display:flex;gap:7px;}
+.state-dot-start{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);}
+.state-dot-start.active{background:var(--gold);border-color:var(--gold);box-shadow:0 0 8px var(--gold);}
+.state-lbl-start{font-size:.55rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;}
+#screen-win{padding:24px;gap:0;background:linear-gradient(160deg,#1565c0,#0d47a1);}
+.win-face-wrap{width:130px;height:130px;background:#5eb8ff;border:3px solid var(--gold);border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px var(--gold-dim);margin-bottom:12px;overflow:hidden;animation:popIn .5s cubic-bezier(.34,1.56,.64,1);}
+.win-face-wrap svg{width:118px;height:118px;}
+@keyframes popIn{from{transform:scale(0) rotate(-15deg);}to{transform:scale(1) rotate(0);}}
+.win-title{font-family:'Fredoka One',cursive;font-size:clamp(2rem,8vw,3rem);color:var(--gold);text-shadow:0 0 30px var(--gold-dim),0 4px 0 #8a6000;text-align:center;}
+.win-charname{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--gold);margin-bottom:4px;}
+.win-sub{font-size:.6rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-bottom:22px;}
+.win-stats{background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:16px;padding:16px 28px;display:flex;gap:32px;align-items:center;margin-bottom:22px;}
+.win-stat{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.win-stat-val{font-family:'Fredoka One',cursive;font-size:2rem;color:#76ff03;text-shadow:0 0 16px #76ff0366;}
+.win-stat-lbl{font-size:.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:.15em;}
+.btn-again{width:100%;max-width:300px;padding:16px;background:linear-gradient(135deg,#ffd700,#ffa000);border:none;border-radius:16px;font-family:'Fredoka One',cursive;font-size:1.1rem;color:#3a1a00;cursor:pointer;touch-action:manipulation;box-shadow:0 6px 0 #e65100,0 0 24px var(--gold-dim);transition:transform .08s;text-transform:uppercase;}
+.btn-again:active{transform:translateY(4px);box-shadow:0 2px 0 #e65100;}
+</style>
+</head>
+<body>
+
+<div id="rotate-overlay">
+  <div class="rotate-icon">📱</div>
+  <div class="rotate-msg">Vire o celular<br>na horizontal!</div>
+  <div class="rotate-sub">O jogo foi feito para landscape</div>
+</div>
+
+<div class="screen" id="screen-start">
+  <div class="logo">CARA A CARA</div>
+  <div class="logo-sub">o clássico jogo dos rostos</div>
+  <div class="secret-box">
+    <div class="secret-lbl">✦ seu personagem secreto ✦</div>
+    <div class="secret-face-wrap" id="start-face-wrap"></div>
+    <div class="secret-char-name" id="start-char-name">---</div>
+  </div>
+  <button class="btn-primary" id="btn-start">▶ INICIAR PARTIDA</button>
+  <button class="btn-ghost" id="btn-reshuffle">↺ SORTEAR OUTRO</button>
+  <div class="state-badge-start" id="state-badge-start">
+    <div class="state-dots-start" id="state-dots-start"></div>
+    <div class="state-lbl-start" id="state-lbl-start"></div>
+  </div>
+</div>
+
+<div class="screen hidden" id="screen-game">
+  <div class="side-panel">
+    <div class="game-logo">CARA<br>A<br>CARA</div>
+    <div class="panel-secret-card">
+      <div class="panel-secret-lbl">Seu secreto</div>
+      <div class="panel-secret-svg" id="panel-face-wrap"></div>
+      <div class="panel-secret-name" id="panel-char-name">---</div>
+    </div>
+    <div class="counter-block">
+      <div class="counter-lbl">Restam</div>
+      <div class="counter-val" id="counter-val">24</div>
+      <div class="counter-of">de 24</div>
+    </div>
+    <button class="btn-win-side" id="btn-win">⭐ ACERTEI<br>O CARA!</button>
+    <button class="btn-menu-side" id="btn-menu">↺ Menu</button>
+    <div>
+      <div class="state-lbl">variação</div>
+      <div class="state-badge" id="state-badge-game"></div>
+    </div>
+  </div>
+  <div class="board-area">
+    <div class="board-hint">▌ Toque para eliminar · toque novamente para restaurar</div>
+    <div class="face-grid" id="face-grid"></div>
+  </div>
+</div>
+
+<div class="screen hidden" id="screen-win">
+  <div class="win-face-wrap" id="win-face-wrap"></div>
+  <div class="win-title">ACERTOU!</div>
+  <div class="win-charname" id="win-charname">---</div>
+  <div class="win-sub">parabéns · você descobriu o personagem!</div>
+  <div class="win-stats">
+    <div class="win-stat"><div class="win-stat-val" id="win-elim">0</div><div class="win-stat-lbl">Eliminados</div></div>
+    <div class="win-stat"><div class="win-stat-val" id="win-rem">0</div><div class="win-stat-lbl">Restavam</div></div>
+  </div>
+  <button class="btn-again" id="btn-again">🎮 JOGAR NOVAMENTE</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// PERSONAGENS DO JOGO CARA A CARA
+// Imagens dos personagens carregadas de ../img/cara_cara/
+// ═══════════════════════════════════════════════════════════
+
+const CHARS = [
+  // ── HOMENS (1-13) ──
+  { name:'Carlos' },      // 1
+  { name:'Luis' },        // 2
+  { name:'João' },        // 3
+  { name:'Felipe' },      // 4
+  { name:'Diego' },       // 5
+  { name:'Marcos' },      // 6
+  { name:'Andréson' },    // 7
+  { name:'Roberto' },     // 8
+  { name:'Samuel' },      // 9
+  { name:'Vinícius' },    // 10
+  { name:'Wagner' },      // 11
+  { name:'Xis' },         // 12
+  { name:'Renato' },      // 13
+  
+  // ── MULHERES (14-24) ──
+  { name:'Andréia' },     // 14
+  { name:'Fátima' },      // 15
+  { name:'Luzia' },       // 16
+  { name:'Débora' },      // 17
+  { name:'Milena' },      // 18
+  { name:'Rita' },        // 19
+  { name:'Sônia' },       // 20
+  { name:'Vanessa' },     // 21
+  { name:'Yasmin' },      // 22
+];
+
+// ═══════════════════════════════════════════════════════════
+// LÓGICA DE STATE — alterna entre state_1, state_2, state_3
+// a cada atualização da página (persiste via localStorage)
+// ═══════════════════════════════════════════════════════════
+const STATES = ['state_1', 'state_2', 'state_3'];
+const STATE_KEY = 'caracara_state_index';
+
+function getNextStateIndex() {
+  const current = parseInt(localStorage.getItem(STATE_KEY) ?? '-1', 10);
+  const next = (current + 1) % STATES.length;
+  localStorage.setItem(STATE_KEY, next);
+  return next;
+}
+
+const currentStateIndex = getNextStateIndex();
+const currentState = STATES[currentStateIndex]; // 'state_1' | 'state_2' | 'state_3'
+
+function imgPath(charNum) {
+  return `../img/cara_cara/${currentState}/${charNum}.webp`;
+}
+
+// ── STATE ──
+let secretChar = null;
+let eliminated = new Set();
+const TOTAL = CHARS.length;
+
+const $ = id => document.getElementById(id);
+const screens = { start:$('screen-start'), game:$('screen-game'), win:$('screen-win') };
+let currentScreen = 'start';
+
+function showScreen(n) {
+  currentScreen = n;
+  Object.entries(screens).forEach(([k,el]) => el.classList.toggle('hidden', k!==n));
+  checkOrientation();
+}
+
+function checkOrientation() {
+  const isPortrait = window.innerWidth <= window.innerHeight;
+  // Só exige landscape na tela do tabuleiro
+  const needsLandscape = currentScreen === 'game' && isPortrait;
+  $('rotate-overlay').classList.toggle('show', needsLandscape);
+}
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 200));
+checkOrientation();
+
+function pickSecret() {
+  const charIndex = Math.floor(Math.random() * CHARS.length);
+  secretChar = CHARS[charIndex];
+  const charNum = charIndex + 1;
+  
+  // Mostrar imagem real na tela de início
+  const startImg = document.createElement('img');
+  startImg.src = imgPath(charNum);
+  startImg.style.width = '100%';
+  startImg.style.height = '100%';
+  startImg.style.objectFit = 'cover';
+  $('start-face-wrap').innerHTML = '';
+  $('start-face-wrap').appendChild(startImg);
+  
+  $('start-char-name').textContent = secretChar.name;
+  
+  // Mostrar imagem real no painel lateral
+  const panelImg = document.createElement('img');
+  panelImg.src = imgPath(charNum);
+  panelImg.style.width = '100%';
+  panelImg.style.height = '100%';
+  panelImg.style.objectFit = 'cover';
+  $('panel-face-wrap').innerHTML = '';
+  $('panel-face-wrap').appendChild(panelImg);
+  
+  $('panel-char-name').textContent = secretChar.name;
+}
+
+function buildGrid() {
+  const grid = $('face-grid');
+  grid.innerHTML = '';
+  eliminated.clear();
+  $('counter-val').textContent = TOTAL;
+
+  // Criar cópia do array e embaralhar
+  const shuffledChars = [...CHARS].sort(() => Math.random() - 0.5);
+
+  shuffledChars.forEach((char, idx) => {
+    // Encontrar o índice original para carregar a imagem correta
+    const originalIdx = CHARS.findIndex(c => c.name === char.name);
+    const charNum = originalIdx + 1;
+    
+    const card = document.createElement('div');
+    card.className = 'face-card';
+    card.dataset.charIndex = originalIdx; // Armazenar índice original para referência
+    
+    // Container para a imagem
+    const imgContainer = document.createElement('div');
+    imgContainer.style.position = 'relative';
+    imgContainer.style.width = '100%';
+    imgContainer.style.height = '100%';
+    imgContainer.style.overflow = 'hidden';
+    
+    // Criar elemento de imagem
+    const img = document.createElement('img');
+    img.src = imgPath(charNum);
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.style.display = 'block';
+    
+    // Criar nome posicionado no rodapé
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'face-card-name';
+    nameDiv.textContent = char.name;
+    nameDiv.style.position = 'absolute';
+    nameDiv.style.bottom = '0';
+    nameDiv.style.left = '0';
+    nameDiv.style.right = '0';
+    nameDiv.style.zIndex = '10';
+    
+    imgContainer.appendChild(img);
+    imgContainer.appendChild(nameDiv);
+    card.appendChild(imgContainer);
+
+    const toggle = e => {
+      if (e.cancelable) e.preventDefault();
+      eliminated.has(originalIdx) ? (eliminated.delete(originalIdx), card.classList.remove('elim'))
+                                   : (eliminated.add(originalIdx),    card.classList.add('elim'));
+      $('counter-val').textContent = TOTAL - eliminated.size;
+    };
+    card.addEventListener('touchstart', toggle, { passive: false });
+    card.addEventListener('click', toggle);
+    grid.appendChild(card);
+  });
+}
+
+function declareWin() {
+  // Encontrar o índice do personagem secreto
+  const charIndex = CHARS.findIndex(c => c.name === secretChar.name);
+  const charNum = charIndex + 1;
+  
+  // Mostrar imagem real na tela de vitória
+  const winImg = document.createElement('img');
+  winImg.src = imgPath(charNum);
+  winImg.style.width = '100%';
+  winImg.style.height = '100%';
+  winImg.style.objectFit = 'cover';
+  $('win-face-wrap').innerHTML = '';
+  $('win-face-wrap').appendChild(winImg);
+  
+  $('win-charname').textContent = secretChar.name;
+  $('win-elim').textContent     = eliminated.size;
+  $('win-rem').textContent      = TOTAL - eliminated.size;
+  showScreen('win');
+}
+
+$('btn-start').addEventListener('click', () => { buildGrid(); showScreen('game'); });
+$('btn-reshuffle').addEventListener('click', () => { location.reload(); });
+$('btn-win').addEventListener('click', declareWin);
+$('btn-win').addEventListener('touchstart', e => { e.preventDefault(); declareWin(); }, { passive: false });
+$('btn-menu').addEventListener('click', () => { pickSecret(); showScreen('start'); });
+$('btn-again').addEventListener('click', () => { pickSecret(); showScreen('start'); });
+
+function renderStateBadges() {
+  const num = currentStateIndex + 1;
+
+  // Badge da tela de start
+  const dotsStart = $('state-dots-start');
+  dotsStart.innerHTML = '';
+  STATES.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'state-dot-start' + (i === currentStateIndex ? ' active' : '');
+    dotsStart.appendChild(d);
+  });
+  $('state-lbl-start').textContent = `variação ${num} de ${STATES.length}`;
+
+  // Badge do painel lateral
+  const badgeGame = $('state-badge-game');
+  badgeGame.innerHTML = '';
+  STATES.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'state-dot' + (i === currentStateIndex ? ' active' : '');
+    badgeGame.appendChild(d);
+  });
+}
+
+renderStateBadges();
+pickSecret();
+</script>
+</body>
+</html>

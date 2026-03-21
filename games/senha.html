@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#080612">
+<title>SENHA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --bg:        #080612;
+  --surface:   #100c1e;
+  --card:      #140f24;
+  --border:    #2a1f4a;
+  --neon-pink: #ff2d78;
+  --neon-cyan: #00f5ff;
+  --neon-yel:  #ffe600;
+  --neon-grn:  #00ff88;
+  --dim-pink:  #ff2d7833;
+  --dim-cyan:  #00f5ff33;
+  --dim-yel:   #ffe60033;
+  --dim-grn:   #00ff8833;
+  --text:      #c8b8f0;
+  --muted:     #4a3a6a;
+  --white:     #f0e8ff;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html, body {
+  height: 100%; width: 100%;
+  background: var(--bg);
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--text);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+
+/* CRT scanline + vignette */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
+  pointer-events: none; z-index: 1000;
+}
+
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, #000000cc 100%);
+  pointer-events: none; z-index: 999;
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.96); }
+
+/* ══════════════
+   START SCREEN
+══════════════ */
+#screen-start {
+  padding: 28px 24px;
+  gap: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, #2a005544, transparent),
+    radial-gradient(ellipse 60% 40% at 50% 100%, #001a4444, transparent);
+}
+
+.arcade-logo {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.arcade-logo h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(2.2rem, 10vw, 3rem);
+  color: var(--neon-cyan);
+  text-shadow:
+    0 0 10px var(--neon-cyan),
+    0 0 30px var(--neon-cyan),
+    0 0 60px #00f5ff66;
+  letter-spacing: 0.05em;
+  animation: flicker 4s infinite;
+}
+
+@keyframes flicker {
+  0%,92%,94%,96%,100% { opacity: 1; }
+  93%,95% { opacity: 0.6; }
+}
+
+.insert-coin {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: var(--neon-pink);
+  text-shadow: 0 0 8px var(--neon-pink);
+  letter-spacing: 0.15em;
+  margin-top: 8px;
+  animation: blink 1.2s step-end infinite;
+  text-transform: uppercase;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Secret box */
+.secret-box {
+  width: 100%;
+  background: var(--card);
+  border: 2px solid var(--neon-cyan);
+  border-radius: 4px;
+  box-shadow: 0 0 20px var(--dim-cyan), inset 0 0 20px #00f5ff08;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin: 24px 0 20px;
+  position: relative;
+}
+
+/* Corner decorations */
+.secret-box::before, .secret-box::after {
+  content: '█';
+  position: absolute;
+  font-size: 0.6rem;
+  color: var(--neon-cyan);
+}
+
+.secret-box::before { top: -8px; left: -2px; }
+.secret-box::after  { bottom: -8px; right: -2px; }
+
+.secret-lbl {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  color: var(--neon-cyan);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.secret-digits-row {
+  display: flex;
+  gap: 16px;
+}
+
+.secret-digit {
+  width: 76px; height: 84px;
+  background: var(--surface);
+  border: 2px solid var(--neon-yel);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 2.2rem;
+  color: var(--neon-yel);
+  text-shadow: 0 0 16px var(--neon-yel), 0 0 40px var(--dim-yel);
+  box-shadow: 0 0 16px var(--dim-yel), inset 0 0 12px #ffe60008;
+  animation: digitPulse 2.5s ease-in-out infinite;
+}
+
+.secret-digit:nth-child(2) { animation-delay: 0.5s; }
+.secret-digit:nth-child(3) { animation-delay: 1s; }
+
+@keyframes digitPulse {
+  0%,100% { box-shadow: 0 0 12px var(--dim-yel), inset 0 0 12px #ffe60008; }
+  50%      { box-shadow: 0 0 28px #ffe60066, inset 0 0 20px #ffe60014; }
+}
+
+.secret-note {
+  font-size: 0.6rem;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.8;
+  letter-spacing: 0.05em;
+}
+
+.secret-note strong { color: var(--neon-pink); }
+
+/* Buttons */
+.btn-arcade {
+  width: 100%;
+  padding: 18px;
+  background: var(--neon-pink);
+  border: none; border-radius: 4px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: #fff;
+  cursor: pointer;
+  touch-action: manipulation;
+  text-transform: uppercase;
+  box-shadow: 0 0 24px var(--dim-pink), 0 4px 0 #99004a;
+  transition: transform 0.08s, box-shadow 0.08s;
+  text-shadow: 0 0 8px #fff6;
+  line-height: 1.6;
+}
+
+.btn-arcade:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 12px var(--dim-pink), 0 1px 0 #99004a;
+}
+
+.btn-ghost {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  background: transparent;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  cursor: pointer;
+  touch-action: manipulation;
+  text-transform: uppercase;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-ghost:active { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+
+/* ══════════════
+   GAME SCREEN
+══════════════ */
+#screen-game {
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 100% 30% at 50% 0%, #00111a66, transparent);
+}
+
+/* HUD bar */
+.hud {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 10px;
+  border-bottom: 2px solid var(--neon-cyan);
+  box-shadow: 0 2px 20px var(--dim-cyan);
+  flex-shrink: 0;
+  background: var(--card);
+}
+
+.hud-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.9rem;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.hud-secret {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 2px solid var(--neon-yel);
+  border-radius: 4px;
+  padding: 8px 14px;
+  box-shadow: 0 0 12px var(--dim-yel);
+}
+
+.hud-secret-lbl {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.38rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.hud-secret-val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1rem;
+  color: var(--neon-yel);
+  text-shadow: 0 0 12px var(--neon-yel);
+  letter-spacing: 0.15em;
+}
+
+/* Input panel */
+.input-panel {
+  width: 100%;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.panel-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.38rem;
+  color: var(--neon-pink);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.digit-inputs { display: flex; gap: 8px; flex: 1; }
+
+.digit-input {
+  flex: 1;
+  height: 60px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.6rem;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px var(--neon-cyan);
+  outline: none;
+  -webkit-appearance: none;
+  caret-color: var(--neon-pink);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  line-height: 1;
+}
+
+.digit-input:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 16px var(--dim-cyan), inset 0 0 12px #00f5ff08;
+}
+
+.digit-input::-webkit-inner-spin-button,
+.digit-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.digit-input.error {
+  border-color: var(--neon-pink) !important;
+  box-shadow: 0 0 16px var(--dim-pink) !important;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25%      { transform: translateX(-4px); }
+  75%      { transform: translateX(4px); }
+}
+
+.btn-send {
+  padding: 0 16px;
+  background: var(--neon-pink);
+  border: none; border-radius: 4px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.45rem;
+  letter-spacing: 0.08em;
+  color: #fff;
+  cursor: pointer;
+  touch-action: manipulation;
+  text-transform: uppercase;
+  box-shadow: 0 0 16px var(--dim-pink), 0 3px 0 #99004a;
+  transition: transform 0.08s;
+  line-height: 1.6;
+}
+
+.btn-send:active { transform: translateY(2px); box-shadow: 0 0 8px var(--dim-pink), 0 1px 0 #99004a; }
+
+/* History */
+.history-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 18px 130px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 40px;
+  opacity: 0.4;
+}
+
+.empty-state .pixel-art {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 2rem;
+  line-height: 1.2;
+  color: var(--neon-cyan);
+  text-align: center;
+}
+
+.empty-state p {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.4rem;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.8;
+}
+
+/* Attempt row */
+.attempt-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: rowIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes rowIn {
+  from { transform: translateX(-12px) scale(0.97); opacity: 0; }
+  to   { transform: translateX(0) scale(1); opacity: 1; }
+}
+
+.attempt-index {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.38rem;
+  color: var(--muted);
+  width: 16px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.attempt-digits { display: flex; gap: 6px; flex: 1; }
+
+.hist-digit {
+  flex: 1;
+  aspect-ratio: 1 / 1;
+  min-height: 72px;
+  border-radius: 4px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.6rem;
+  color: var(--text);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+  user-select: none;
+}
+
+.hist-digit:active { transform: scale(0.9); }
+
+.hist-digit.yellow {
+  background: #2a1f00;
+  border-color: var(--neon-yel);
+  color: var(--neon-yel);
+  text-shadow: 0 0 10px var(--neon-yel);
+  box-shadow: 0 0 14px var(--dim-yel), inset 0 0 10px #ffe60008;
+}
+
+.hist-digit.green {
+  background: #00200f;
+  border-color: var(--neon-grn);
+  color: var(--neon-grn);
+  text-shadow: 0 0 10px var(--neon-grn);
+  box-shadow: 0 0 14px var(--dim-grn), inset 0 0 10px #00ff8808;
+}
+
+/* Score pills */
+.attempt-score {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+  width: 40px;
+}
+
+.score-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+}
+
+.score-pill.grn {
+  background: #00200f;
+  border: 1px solid var(--neon-grn);
+  color: var(--neon-grn);
+  box-shadow: 0 0 8px var(--dim-grn);
+}
+
+.score-pill.yel {
+  background: #2a1f00;
+  border: 1px solid var(--neon-yel);
+  color: var(--neon-yel);
+  box-shadow: 0 0 8px var(--dim-yel);
+}
+
+/* Bottom bar */
+.bottom-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 12px 18px 28px;
+  background: linear-gradient(to top, var(--bg) 65%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.btn-win {
+  pointer-events: all;
+  width: 100%;
+  padding: 18px;
+  background: var(--neon-grn);
+  border: none; border-radius: 4px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: #002010;
+  cursor: pointer;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  box-shadow: 0 0 28px var(--dim-grn), 0 4px 0 #006633;
+  transition: transform 0.08s;
+  line-height: 1.8;
+  animation: winBtnPulse 2s ease-in-out infinite;
+}
+
+@keyframes winBtnPulse {
+  0%,100% { box-shadow: 0 0 20px var(--dim-grn), 0 4px 0 #006633; }
+  50%      { box-shadow: 0 0 40px #00ff8866, 0 4px 0 #006633; }
+}
+
+.btn-win:active { transform: translateY(3px); box-shadow: 0 0 12px var(--dim-grn), 0 1px 0 #006633; }
+
+.legend {
+  pointer-events: none;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.32rem;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.legend-dot {
+  width: 8px; height: 8px; border-radius: 2px;
+}
+
+.legend-dot.y { background: var(--neon-yel); box-shadow: 0 0 6px var(--neon-yel); }
+.legend-dot.g { background: var(--neon-grn); box-shadow: 0 0 6px var(--neon-grn); }
+
+/* ══════════════
+   WIN SCREEN
+══════════════ */
+#screen-win {
+  padding: 28px 24px;
+  gap: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 30%, #00ff8812, transparent);
+}
+
+.win-pixel-art {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 3.5rem;
+  text-align: center;
+  margin-bottom: 20px;
+  animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0) rotate(-10deg); }
+  to   { transform: scale(1) rotate(0); }
+}
+
+.win-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1rem, 5vw, 1.4rem);
+  color: var(--neon-grn);
+  text-shadow: 0 0 20px var(--neon-grn), 0 0 50px var(--dim-grn);
+  text-align: center;
+  margin-bottom: 6px;
+  animation: flicker 3s infinite;
+}
+
+.win-sub {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.38rem;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  margin-bottom: 36px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.win-stats-box {
+  width: 100%;
+  background: var(--card);
+  border: 2px solid var(--neon-grn);
+  border-radius: 4px;
+  box-shadow: 0 0 24px var(--dim-grn);
+  padding: 24px 20px;
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 28px;
+}
+
+.win-stat { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+
+.win-stat-val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.6rem;
+  color: var(--neon-yel);
+  text-shadow: 0 0 16px var(--neon-yel);
+}
+
+.win-stat-lbl {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.38rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.win-sep { width: 1px; background: var(--border); align-self: stretch; }
+</style>
+</head>
+<body>
+
+<!-- ── START ── -->
+<div class="screen" id="screen-start">
+  <div class="arcade-logo">
+    <h1>SENHA</h1>
+    <div class="insert-coin">► INSERT COIN ◄</div>
+  </div>
+
+  <div class="secret-box">
+    <div class="secret-lbl">// SEU NÚMERO SECRETO //</div>
+    <div class="secret-digits-row">
+      <div class="secret-digit" id="sd0">?</div>
+      <div class="secret-digit" id="sd1">?</div>
+      <div class="secret-digit" id="sd2">?</div>
+    </div>
+  </div>
+
+  <button class="btn-arcade" id="btn-start">▶ INICIAR PARTIDA</button>
+  <button class="btn-ghost" id="btn-reshuffle">↺ NOVO SORTEIO</button>
+</div>
+
+<!-- ── GAME ── -->
+<div class="screen hidden" id="screen-game">
+  <div class="hud">
+    <div class="hud-title">SENHA</div>
+    <div class="hud-secret">
+      <div class="hud-secret-lbl">SEU Nº</div>
+      <div class="hud-secret-val" id="hud-num">---</div>
+    </div>
+  </div>
+
+  <div class="input-panel">
+    <div class="panel-label">▌ TENTATIVA DO OPONENTE</div>
+    <div class="input-row">
+      <div class="digit-inputs">
+        <input class="digit-input" id="d0" type="number" min="0" max="9" inputmode="numeric" placeholder="·">
+        <input class="digit-input" id="d1" type="number" min="0" max="9" inputmode="numeric" placeholder="·">
+        <input class="digit-input" id="d2" type="number" min="0" max="9" inputmode="numeric" placeholder="·">
+      </div>
+      <button class="btn-send" id="btn-send">EN-<br>VIAR</button>
+    </div>
+  </div>
+
+  <div class="history-scroll" id="history">
+    <div class="empty-state" id="empty-state">
+      <div class="pixel-art">?_?</div>
+      <p>NENHUMA TENTATIVA<br>REGISTRADA AINDA</p>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn-win" id="btn-win">★ ACERTEI O NÚMERO! ★</button>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot y"></div>CERTO / POS. ERRADA</div>
+      <div class="legend-item"><div class="legend-dot g"></div>POSIÇÃO CERTA</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── WIN ── -->
+<div class="screen hidden" id="screen-win">
+  <div class="win-pixel-art">🏆</div>
+  <div class="win-title">VOCÊ GANHOU!</div>
+  <div class="win-sub">-- GAME CLEAR --</div>
+
+  <div class="win-stats-box">
+    <div class="win-stat">
+      <div class="win-stat-val" id="win-att">0</div>
+      <div class="win-stat-lbl">TENTA-<br>TIVAS</div>
+    </div>
+    <div class="win-sep"></div>
+    <div class="win-stat">
+      <div class="win-stat-val" id="win-sec">---</div>
+      <div class="win-stat-lbl">NÚMERO<br>ERA</div>
+    </div>
+  </div>
+
+  <button class="btn-arcade" id="btn-again">▶ JOGAR NOVAMENTE</button>
+  <button class="btn-ghost" id="btn-menu" style="margin-top:12px;">← MENU</button>
+</div>
+
+<script>
+let secret   = '';
+let attempts = 0;
+
+const screens = {
+  start: document.getElementById('screen-start'),
+  game:  document.getElementById('screen-game'),
+  win:   document.getElementById('screen-win'),
+};
+
+function showScreen(name) {
+  Object.entries(screens).forEach(([k,el]) => el.classList.toggle('hidden', k !== name));
+}
+
+function generateSecret() {
+  secret = [0,1,2].map(() => String(Math.floor(Math.random() * 10))).join('');
+  ['sd0','sd1','sd2'].forEach((id,i) => document.getElementById(id).textContent = secret[i]);
+  document.getElementById('hud-num').textContent = secret;
+}
+
+// ── INPUTS ──
+const inputs = ['d0','d1','d2'].map(id => document.getElementById(id));
+
+inputs.forEach((inp, i) => {
+  inp.addEventListener('input', () => {
+    const v = inp.value.replace(/\D/g,'');
+    inp.value = v.length ? v[v.length - 1] : '';
+    if (inp.value !== '' && i < 2) inputs[i+1].focus();
+  });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Backspace' && !inp.value && i > 0) {
+      inputs[i-1].focus();
+      inputs[i-1].value = '';
+    }
+    if (e.key === 'Enter') sendGuess();
+  });
+  inp.addEventListener('focus', () => inp.select());
+});
+
+function sendGuess() {
+  const guess = inputs.map(i => i.value).join('');
+  if (guess.length !== 3) {
+    inputs.forEach(i => {
+      i.classList.add('error');
+      setTimeout(() => i.classList.remove('error'), 400);
+    });
+    return;
+  }
+  addAttempt(guess);
+  inputs.forEach(i => i.value = '');
+  inputs[0].focus();
+}
+
+function addAttempt(guess) {
+  attempts++;
+  const attemptId = attempts;
+  document.getElementById('empty-state')?.remove();
+
+  const history = document.getElementById('history');
+  const states = [0,0,0];
+  const cls = ['','yellow','green'];
+
+  const row = document.createElement('div');
+  row.className = 'attempt-row';
+
+  const idx = document.createElement('div');
+  idx.className = 'attempt-index';
+  idx.textContent = attemptId;
+
+  const digs = document.createElement('div');
+  digs.className = 'attempt-digits';
+
+  const scoreEl = document.createElement('div');
+  scoreEl.className = 'attempt-score';
+  scoreEl.innerHTML =
+    `<div class="score-pill grn"><span id="g${attemptId}">0</span></div>` +
+    `<div class="score-pill yel"><span id="y${attemptId}">0</span></div>`;
+
+  function updateScore() {
+    document.getElementById('g'+attemptId).textContent = states.filter(s=>s===2).length;
+    document.getElementById('y'+attemptId).textContent = states.filter(s=>s===1).length;
+  }
+
+  guess.split('').forEach((digit, i) => {
+    const box = document.createElement('div');
+    box.className = 'hist-digit';
+    box.textContent = digit;
+
+    const toggle = (e) => {
+      if (e.cancelable) e.preventDefault();
+      states[i] = (states[i]+1) % 3;
+      box.className = 'hist-digit ' + cls[states[i]];
+      updateScore();
+    };
+
+    box.addEventListener('touchstart', toggle, { passive: false });
+    box.addEventListener('click', toggle);
+    digs.appendChild(box);
+  });
+
+  row.appendChild(idx);
+  row.appendChild(digs);
+  row.appendChild(scoreEl);
+  history.prepend(row);
+}
+
+// ── EVENTS ──
+document.getElementById('btn-send').addEventListener('click', sendGuess);
+document.getElementById('btn-send').addEventListener('touchstart', e => { e.preventDefault(); sendGuess(); }, { passive: false });
+
+document.getElementById('btn-win').addEventListener('click', declareWin);
+document.getElementById('btn-win').addEventListener('touchstart', e => { e.preventDefault(); declareWin(); }, { passive: false });
+
+function declareWin() {
+  document.getElementById('win-att').textContent = attempts;
+  document.getElementById('win-sec').textContent = secret;
+  showScreen('win');
+}
+
+document.getElementById('btn-start').addEventListener('click', () => {
+  attempts = 0;
+  document.getElementById('history').innerHTML =
+    `<div class="empty-state" id="empty-state">
+       <div class="pixel-art">?_?</div>
+       <p>NENHUMA TENTATIVA<br>REGISTRADA AINDA</p>
+     </div>`;
+  showScreen('game');
+  setTimeout(() => inputs[0].focus(), 350);
+});
+
+document.getElementById('btn-reshuffle').addEventListener('click', generateSecret);
+
+['btn-again','btn-menu'].forEach(id => {
+  document.getElementById(id).addEventListener('click', () => {
+    generateSecret();
+    attempts = 0;
+    document.getElementById('history').innerHTML =
+      `<div class="empty-state" id="empty-state">
+         <div class="pixel-art">?_?</div>
+         <p>NENHUMA TENTATIVA<br>REGISTRADA AINDA</p>
+       </div>`;
+    showScreen('start');
+  });
+});
+
+generateSecret();
+</script>
+</body>
+</html>
