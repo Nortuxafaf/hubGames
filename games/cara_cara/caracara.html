@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1976d2">
+<title>CARA A CARA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+:root{
+  --bg:#0d47a1; --surface:#1565c0; --card:#1976d2; --border:#42a5f5;
+  --gold:#ffd700; --gold-dim:#ffd70044; --red:#f44336; --green:#4caf50;
+  --text:#fff; --muted:#90caf9;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100dvh;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);overflow:hidden;}
+
+/* ── SCREENS ── */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .25s,transform .25s;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+.screen.hidden{opacity:0;pointer-events:none;transform:scale(0.97);}
+
+/* ══════════════════════════════════════════
+   TELAS DE MENU (seed / start / win)
+   portrait: coluna centralizada com padding seguro
+══════════════════════════════════════════ */
+#screen-seed,#screen-start,#screen-win{
+  padding: env(safe-area-inset-top,16px) 20px env(safe-area-inset-bottom,20px);
+  gap:0;
+  background:linear-gradient(160deg,#1565c0,#0d47a1);
+  justify-content:flex-start;
+  padding-top:max(env(safe-area-inset-top),20px);
+}
+/* centra verticalmente quando o conteúdo cabe na tela */
+#screen-seed > *,#screen-start > *,#screen-win > *{flex-shrink:0;}
+
+.menu-inner{
+  width:100%;max-width:420px;
+  margin:auto;
+  display:flex;flex-direction:column;align-items:center;
+  gap:0;padding:16px 0 24px;
+}
+
+/* ── LOGO ── */
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(2.2rem,9vw,3.4rem);color:var(--gold);text-shadow:0 0 30px #ffd70066,0 4px 0 #8a6000;text-align:center;line-height:1;}
+.logo-sub{font-size:clamp(.6rem,2.5vw,.75rem);letter-spacing:.3em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:20px;margin-top:4px;}
+
+/* ── SEED BOX ── */
+.seed-box{
+  background:rgba(255,255,255,0.10);border:2px solid var(--gold);border-radius:20px;
+  padding:clamp(14px,4vw,22px) clamp(14px,4vw,22px);
+  width:100%;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  box-shadow:0 0 30px var(--gold-dim);margin-bottom:16px;backdrop-filter:blur(4px);
+}
+.seed-section-title{font-family:'Fredoka One',cursive;font-size:clamp(.65rem,2.5vw,.78rem);color:var(--gold);letter-spacing:.2em;text-transform:uppercase;text-align:center;}
+.seed-generated{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;}
+.seed-code-display{
+  font-family:'Fredoka One',cursive;font-size:clamp(2.2rem,10vw,3rem);
+  color:#fff;background:rgba(0,0,0,0.35);border:3px solid var(--gold);
+  border-radius:14px;padding:10px 24px;letter-spacing:.4em;
+  text-shadow:0 0 18px var(--gold-dim);width:100%;text-align:center;
+  animation:seedGlow 2.5s ease-in-out infinite;
+}
+@keyframes seedGlow{0%,100%{box-shadow:0 0 10px var(--gold-dim);}50%{box-shadow:0 0 28px #ffd70055;}}
+.seed-hint{font-size:clamp(.62rem,2.2vw,.72rem);color:var(--muted);text-align:center;line-height:1.7;}
+.seed-hint strong{color:#ffcc02;}
+
+.seed-divider{width:100%;display:flex;align-items:center;gap:8px;}
+.seed-divider::before,.seed-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.2);}
+.seed-divider-txt{font-size:clamp(.52rem,2vw,.62rem);color:var(--muted);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;}
+
+.seed-join{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;}
+.seed-input-row{display:flex;gap:10px;width:100%;}
+.seed-input{
+  flex:1;padding:clamp(10px,3vw,14px) 12px;
+  background:rgba(0,0,0,0.3);border:2px solid rgba(255,255,255,0.25);border-radius:12px;
+  font-family:'Fredoka One',cursive;font-size:clamp(1.3rem,5vw,1.8rem);
+  color:#fff;text-align:center;letter-spacing:.25em;outline:none;
+  transition:border-color .2s;text-transform:uppercase;
+}
+.seed-input::placeholder{color:rgba(255,255,255,0.2);font-size:clamp(.8rem,3vw,1rem);letter-spacing:.05em;}
+.seed-input:focus{border-color:var(--gold);}
+.btn-join{
+  padding:clamp(10px,3vw,14px) clamp(12px,4vw,18px);
+  background:linear-gradient(135deg,#ffd700,#ffa000);border:none;border-radius:12px;
+  font-family:'Fredoka One',cursive;font-size:clamp(.65rem,2.5vw,.8rem);
+  color:#3a1a00;cursor:pointer;touch-action:manipulation;
+  box-shadow:0 4px 0 #e65100;transition:transform .08s;
+  text-transform:uppercase;white-space:nowrap;line-height:1.4;
+}
+.btn-join:active{transform:translateY(3px);box-shadow:0 1px 0 #e65100;}
+.seed-error{font-size:clamp(.6rem,2vw,.7rem);color:var(--red);min-height:1rem;text-align:center;}
+
+/* ── BOTÕES GERAIS ── */
+.btn-primary{
+  width:100%;padding:clamp(14px,4vw,18px);
+  background:linear-gradient(135deg,#ff6b35,#f44336);border:none;border-radius:16px;
+  font-family:'Fredoka One',cursive;font-size:clamp(1rem,4vw,1.2rem);
+  color:#fff;cursor:pointer;touch-action:manipulation;
+  box-shadow:0 6px 0 #b71c1c,0 0 24px #f4433655;
+  transition:transform .08s,box-shadow .08s;text-transform:uppercase;margin-top:4px;
+}
+.btn-primary:active{transform:translateY(4px);box-shadow:0 2px 0 #b71c1c;}
+.btn-ghost{
+  margin-top:10px;background:rgba(255,255,255,0.1);
+  border:2px solid rgba(255,255,255,0.3);border-radius:12px;
+  padding:clamp(9px,3vw,12px) 28px;
+  font-family:'Nunito',sans-serif;font-size:clamp(.65rem,2.5vw,.75rem);
+  font-weight:700;letter-spacing:.1em;color:var(--muted);
+  cursor:pointer;touch-action:manipulation;text-transform:uppercase;transition:all .2s;
+}
+.btn-ghost:active{border-color:var(--gold);color:var(--gold);}
+
+/* ── TELA START ── */
+.seed-badge{
+  background:rgba(0,0,0,0.3);border:1px solid rgba(255,215,0,0.4);
+  border-radius:30px;padding:5px 16px;
+  font-family:'Fredoka One',cursive;font-size:clamp(.6rem,2.5vw,.72rem);
+  color:var(--gold);letter-spacing:.2em;margin-bottom:12px;
+}
+.secret-box{
+  background:rgba(255,255,255,0.12);border:2px solid var(--gold);border-radius:20px;
+  padding:clamp(14px,4vw,20px);width:100%;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  box-shadow:0 0 30px var(--gold-dim);margin-bottom:16px;backdrop-filter:blur(4px);
+}
+.secret-lbl{font-family:'Fredoka One',cursive;font-size:clamp(.65rem,2.5vw,.78rem);color:var(--gold);letter-spacing:.2em;text-transform:uppercase;}
+.secret-face-wrap{
+  width:clamp(100px,28vw,140px);height:clamp(100px,28vw,140px);
+  background:#5eb8ff;border:3px solid var(--gold);border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 24px var(--gold-dim);animation:sPulse 2.5s ease-in-out infinite;overflow:hidden;
+}
+.secret-face-wrap img{width:100%;height:100%;object-fit:cover;}
+@keyframes sPulse{0%,100%{box-shadow:0 0 16px var(--gold-dim);}50%{box-shadow:0 0 36px #ffd70066;}}
+.secret-char-name{font-family:'Fredoka One',cursive;font-size:clamp(.9rem,3.5vw,1.1rem);color:var(--gold);}
+.secret-note{font-size:clamp(.62rem,2.2vw,.72rem);color:var(--muted);text-align:center;line-height:1.7;}
+.secret-note strong{color:#ffcc02;}
+
+/* ══════════════════════════════════════════
+   TELA DE JOGO
+   portrait → coluna (topo: info bar, meio: grid, baixo: ações)
+   landscape → linha (lado: painel, centro: grid)
+══════════════════════════════════════════ */
+#screen-game{
+  padding:0;overflow:hidden;
+  justify-content:flex-start;align-items:stretch;
+  flex-direction:column;           /* portrait default */
+}
+
+/* ── TOP BAR (portrait) ── */
+.top-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:clamp(6px,2vw,10px) clamp(8px,3vw,14px);
+  background:rgba(0,0,0,0.3);
+  border-bottom:1px solid rgba(255,255,255,0.12);
+  flex-shrink:0;gap:8px;
+  padding-top:max(env(safe-area-inset-top),8px);
+}
+.top-bar-secret{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.08);border:1.5px solid var(--gold);
+  border-radius:10px;padding:4px 8px 4px 4px;
+}
+.top-bar-img{
+  width:clamp(32px,8vw,44px);height:clamp(32px,8vw,44px);
+  border-radius:7px;overflow:hidden;background:#5eb8ff;flex-shrink:0;
+}
+.top-bar-img img{width:100%;height:100%;object-fit:cover;}
+.top-bar-info{display:flex;flex-direction:column;gap:1px;}
+.top-bar-lbl{font-size:clamp(.42rem,1.5vw,.52rem);color:var(--gold);text-transform:uppercase;letter-spacing:.1em;font-weight:900;}
+.top-bar-name{font-family:'Fredoka One',cursive;font-size:clamp(.65rem,2.5vw,.82rem);color:#fff;line-height:1;}
+.top-bar-seed{font-family:'Fredoka One',cursive;font-size:clamp(.48rem,1.8vw,.6rem);color:var(--gold);letter-spacing:.1em;opacity:.8;}
+.top-bar-counter{display:flex;flex-direction:column;align-items:center;gap:0;}
+.top-bar-counter-val{font-family:'Fredoka One',cursive;font-size:clamp(1.3rem,5vw,1.8rem);color:#76ff03;text-shadow:0 0 10px #76ff0366;line-height:1;}
+.top-bar-counter-lbl{font-size:clamp(.38rem,1.4vw,.48rem);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.top-bar-actions{display:flex;flex-direction:column;gap:5px;}
+.btn-win-top{
+  padding:clamp(7px,2vw,10px) clamp(8px,2.5vw,12px);
+  background:linear-gradient(135deg,#76ff03,#64dd17);border:none;border-radius:9px;
+  font-family:'Fredoka One',cursive;font-size:clamp(.52rem,2vw,.65rem);
+  color:#1a3300;cursor:pointer;touch-action:manipulation;
+  box-shadow:0 3px 0 #1b5e20;transition:transform .08s;
+  text-transform:uppercase;line-height:1.4;text-align:center;
+  animation:winPulse 2s ease-in-out infinite;
+}
+@keyframes winPulse{0%,100%{box-shadow:0 3px 0 #1b5e20,0 0 8px #76ff0333;}50%{box-shadow:0 3px 0 #1b5e20,0 0 18px #76ff0377;}}
+.btn-win-top:active{transform:translateY(2px);box-shadow:0 1px 0 #1b5e20;}
+.btn-menu-top{
+  padding:clamp(5px,1.5vw,7px) clamp(6px,2vw,10px);
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
+  border-radius:7px;font-size:clamp(.42rem,1.6vw,.52rem);font-weight:900;
+  color:var(--muted);cursor:pointer;touch-action:manipulation;text-transform:uppercase;
+}
+.btn-menu-top:active{color:#fff;border-color:#fff;}
+
+/* ── BOARD ── */
+.board-area{
+  flex:1;overflow:hidden;
+  display:flex;flex-direction:column;
+  padding:clamp(4px,1.5vw,8px);gap:4px;
+  min-height:0;
+}
+.board-hint{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(.42rem,1.6vw,.55rem);
+  color:var(--muted);letter-spacing:.08em;text-transform:uppercase;flex-shrink:0;
+}
+.face-grid{
+  flex:1;display:grid;
+  gap:clamp(3px,1vw,6px);
+  overflow:hidden;min-height:0;
+}
+.face-card{
+  background:#5eb8ff;border:2px solid #1e88e5;border-radius:clamp(5px,1.5vw,9px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;touch-action:manipulation;
+  transition:border-color .15s,opacity .2s,transform .1s;
+  position:relative;overflow:hidden;padding:0;
+}
+.face-card:not(.elim):active{transform:scale(0.89);}
+.face-card img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;}
+.face-card-name{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(.22rem,.9cqw,.5rem);
+  color:#1a3a6a;letter-spacing:.02em;text-align:center;line-height:1;
+  background:rgba(255,255,255,0.82);width:100%;padding:2px 0;
+  border-radius:0 0 5px 5px;
+  position:absolute;bottom:0;left:0;right:0;z-index:10;
+}
+.face-card.elim{background:#0a2244;border-color:#1a3a6a;cursor:default;}
+.face-card.elim img,.face-card.elim .face-card-name{opacity:.07;}
+.face-card.elim::after{
+  content:'✕';position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(1.8rem,8cqw,4rem);color:var(--red);font-weight:900;
+  font-family:'Fredoka One',cursive;
+  text-shadow:0 0 14px var(--red),0 0 30px var(--red);
+}
+
+/* ── SIDE PANEL (landscape only) ── */
+.side-panel{display:none;}
+
+/* ══ LANDSCAPE ══ */
+@media (orientation:landscape){
+  #screen-game{flex-direction:row;}
+  .top-bar{display:none;}
+  .side-panel{
+    display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    width:clamp(72px,12vw,100px);
+    padding:clamp(6px,1.5vh,10px) clamp(4px,1vw,7px);
+    background:rgba(0,0,0,0.28);
+    border-right:2px solid rgba(255,255,255,0.13);
+    flex-shrink:0;gap:4px;
+    padding-top:max(env(safe-area-inset-top),6px);
+    padding-bottom:max(env(safe-area-inset-bottom),6px);
+  }
+  .game-logo{font-family:'Fredoka One',cursive;font-size:clamp(.6rem,1.4vw,.85rem);color:var(--gold);text-align:center;line-height:1.2;}
+  .panel-secret-card{
+    background:rgba(255,255,255,0.12);border:2px solid var(--gold);border-radius:10px;
+    padding:5px 4px;width:100%;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    box-shadow:0 0 10px var(--gold-dim);
+  }
+  .panel-secret-lbl{font-size:clamp(.35rem,.8vw,.45rem);letter-spacing:.1em;color:var(--gold);text-transform:uppercase;font-weight:900;}
+  .panel-secret-svg{
+    width:clamp(44px,8vw,62px);height:clamp(44px,8vw,62px);
+    overflow:hidden;border-radius:7px;background:#5eb8ff;
+  }
+  .panel-secret-svg img{width:100%;height:100%;object-fit:cover;}
+  .panel-secret-name{font-family:'Fredoka One',cursive;font-size:clamp(.35rem,.8vw,.45rem);color:var(--gold);text-align:center;}
+  .panel-seed-badge{
+    background:rgba(0,0,0,0.4);border:1px solid rgba(255,215,0,0.35);
+    border-radius:6px;padding:2px 4px;
+    font-family:'Fredoka One',cursive;font-size:clamp(.32rem,.7vw,.4rem);
+    color:var(--gold);letter-spacing:.08em;text-align:center;width:100%;
+  }
+  .counter-block{display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .counter-lbl{font-size:clamp(.32rem,.75vw,.42rem);color:var(--muted);text-transform:uppercase;font-weight:900;letter-spacing:.08em;}
+  .counter-val{font-family:'Fredoka One',cursive;font-size:clamp(1.2rem,2.5vw,1.6rem);color:#76ff03;text-shadow:0 0 10px #76ff0366;line-height:1;}
+  .counter-of{font-size:clamp(.32rem,.7vw,.4rem);color:var(--muted);}
+  .btn-win-side{
+    width:100%;padding:clamp(7px,1.5vh,11px) 3px;
+    background:linear-gradient(135deg,#76ff03,#64dd17);border:none;border-radius:9px;
+    font-family:'Fredoka One',cursive;font-size:clamp(.42rem,1vw,.55rem);
+    color:#1a3300;cursor:pointer;touch-action:manipulation;
+    box-shadow:0 3px 0 #1b5e20;transition:transform .08s;
+    text-transform:uppercase;line-height:1.5;text-align:center;
+    animation:winPulse 2s ease-in-out infinite;
+  }
+  .btn-win-side:active{transform:translateY(2px);box-shadow:0 1px 0 #1b5e20;}
+  .btn-menu-side{
+    width:100%;padding:clamp(5px,1.2vh,8px) 3px;
+    background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
+    border-radius:7px;font-size:clamp(.32rem,.75vw,.42rem);font-weight:900;
+    color:var(--muted);cursor:pointer;touch-action:manipulation;text-transform:uppercase;
+  }
+  .btn-menu-side:active{color:#fff;border-color:#fff;}
+}
+
+/* ── LOADING ── */
+#loading-overlay{display:none;position:fixed;inset:0;background:#0d47a1;z-index:9998;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+#loading-overlay.show{display:flex;}
+
+/* ── ROTATE PROMPT ── */
+#rotate-overlay{
+  display:none;position:fixed;inset:0;background:#0d47a1;z-index:9999;
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  text-align:center;padding:32px;
+}
+#rotate-overlay.show{display:flex;}
+.rotate-icon{font-size:clamp(3rem,12vw,5rem);animation:rotateHint 1.8s ease-in-out infinite;}
+@keyframes rotateHint{
+  0%,100%{transform:rotate(0deg);}
+  40%{transform:rotate(-90deg);}
+  60%{transform:rotate(-90deg);}
+}
+.rotate-txt{font-family:'Fredoka One',cursive;font-size:clamp(1rem,4vw,1.4rem);color:var(--gold);}
+.rotate-sub{font-size:clamp(.65rem,2.5vw,.8rem);color:var(--muted);}
+.loading-spinner{width:48px;height:48px;border:4px solid rgba(255,215,0,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-family:'Fredoka One',cursive;font-size:clamp(.8rem,3vw,.95rem);color:var(--gold);letter-spacing:.1em;}
+</style>
+</head>
+<body>
+
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-txt">Carregando personagens…</div>
+</div>
+
+<div id="rotate-overlay">
+  <div class="rotate-icon" id="rotate-icon">📱</div>
+  <div class="rotate-txt" id="rotate-txt">Vire o celular!</div>
+  <div class="rotate-sub" id="rotate-sub">Esta tela funciona só na vertical</div>
+</div>
+
+<!-- ══════════════════════
+     TELA 0 — SEED
+══════════════════════ -->
+<div class="screen" id="screen-seed">
+  <div class="logo">CARA A CARA</div>
+  <div class="logo-sub">o clássico jogo dos rostos</div>
+
+  <div class="seed-box">
+    <!-- Código gerado -->
+    <div class="seed-generated">
+      <div class="seed-section-title">✦ seu código de partida ✦</div>
+      <div class="seed-code-display" id="seed-display">----</div>
+      <div class="seed-hint">Compartilhe este código com <strong>seu adversário</strong>.<br>Os dois terão o mesmo tabuleiro!</div>
+    </div>
+
+    <div class="seed-divider"><span class="seed-divider-txt">ou entre com o código do adversário</span></div>
+
+    <!-- Input para entrar com código -->
+    <div class="seed-join">
+      <div class="seed-input-row">
+        <input class="seed-input" id="seed-input" type="text" maxlength="6" placeholder="XXXXXX" autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="btn-join" id="btn-use-seed">USAR<br>CÓDIGO</button>
+      </div>
+      <div class="seed-error" id="seed-error"></div>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="btn-confirm-seed">▶ CONFIRMAR E JOGAR</button>
+  <button class="btn-ghost" id="btn-new-seed">↺ GERAR NOVO CÓDIGO</button>
+</div>
+
+<!-- ══════════════════════
+     TELA 1 — START (personagem secreto)
+══════════════════════ -->
+<div class="screen hidden" id="screen-start">
+  <div class="logo">CARA A CARA</div>
+  <div class="logo-sub">o clássico jogo dos rostos</div>
+  <div class="seed-badge" id="active-seed-badge">CÓDIGO: ------</div>
+  <div class="secret-box">
+    <div class="secret-lbl">✦ seu personagem secreto ✦</div>
+    <div class="secret-face-wrap" id="start-face-wrap"><img id="start-face-img" src="" alt=""></div>
+    <div class="secret-char-name" id="start-char-name">---</div>
+    <div class="secret-note">Não mostre para o adversário! 🤫<br><strong>Só você</strong> vê este personagem.</div>
+  </div>
+  <button class="btn-primary" id="btn-start">▶ INICIAR PARTIDA</button>
+  <button class="btn-ghost" id="btn-reshuffle">↺ SORTEAR OUTRO</button>
+</div>
+
+<!-- ══════════════════════
+     TELA 2 — JOGO
+══════════════════════ -->
+<div class="screen hidden" id="screen-game">
+
+  <!-- TOP BAR: visível no portrait, some no landscape -->
+  <div class="top-bar">
+    <div class="top-bar-secret">
+      <div class="top-bar-img"><img id="top-face-img" src="" alt=""></div>
+      <div class="top-bar-info">
+        <div class="top-bar-lbl">Seu secreto</div>
+        <div class="top-bar-name" id="top-char-name">---</div>
+        <div class="top-bar-seed" id="top-seed-badge">------</div>
+      </div>
+    </div>
+    <div class="top-bar-counter">
+      <div class="top-bar-counter-val" id="counter-val">0</div>
+      <div class="top-bar-counter-lbl" id="counter-of">restam</div>
+    </div>
+    <div class="top-bar-actions">
+      <button class="btn-win-top" id="btn-win">⭐ ACERTEI!</button>
+      <button class="btn-menu-top" id="btn-menu">↺ Menu</button>
+    </div>
+  </div>
+
+  <!-- SIDE PANEL: visível no landscape, some no portrait -->
+  <div class="side-panel">
+    <div class="game-logo">CARA<br>A<br>CARA</div>
+    <div class="panel-secret-card">
+      <div class="panel-secret-lbl">Seu secreto</div>
+      <div class="panel-secret-svg" id="panel-face-wrap"><img id="panel-face-img" src="" alt=""></div>
+      <div class="panel-secret-name" id="panel-char-name">---</div>
+    </div>
+    <div class="panel-seed-badge" id="panel-seed-badge">----</div>
+    <div class="counter-block">
+      <div class="counter-lbl">Restam</div>
+      <div class="counter-val" id="counter-val-land">0</div>
+      <div class="counter-of" id="counter-of-land">de 0</div>
+    </div>
+    <button class="btn-win-side" id="btn-win-land">⭐ ACERTEI<br>O CARA!</button>
+    <button class="btn-menu-side" id="btn-menu-land">↺ Menu</button>
+  </div>
+
+  <div class="board-area">
+    <div class="board-hint">▌ Toque para eliminar · toque novamente para restaurar</div>
+    <div class="face-grid" id="face-grid"></div>
+  </div>
+</div>
+
+
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIGURAÇÃO — ajuste o caminho das imagens se necessário
+// ═══════════════════════════════════════════════════════════════
+const IMG_BASE = './img';
+const MANIFEST = './manifest.json';
+
+// ═══════════════════════════════════════════════════════════════
+// PRNG — Mulberry32 (determinístico)
+// ═══════════════════════════════════════════════════════════════
+function makePRNG(seed) {
+  let s = seed >>> 0;
+  return function() {
+    s += 0x6D2B79F5;
+    let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function seededShuffle(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function codeToSeed(code) {
+  const C = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let n = 0;
+  for (const c of code.toUpperCase()) {
+    const idx = C.indexOf(c);
+    if (idx === -1) return null;
+    n = n * 36 + idx;
+  }
+  return n;
+}
+function seedToCode(n) {
+  const C = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let code = '', v = n >>> 0;
+  for (let i = 0; i < 6; i++) { code = C[v % 36] + code; v = Math.floor(v / 36); }
+  return code;
+}
+function randomSeed() { return Math.floor(Math.random() * 2147483647); }
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// ═══════════════════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════════════════════════
+let CHARS = [];
+let currentSeed = randomSeed();
+let secretChar  = null;
+let eliminated  = new Set();
+let gameTotal   = 0;
+
+const $ = id => document.getElementById(id);
+const screens = { seed:$('screen-seed'), start:$('screen-start'), game:$('screen-game') };
+
+const PORTRAIT_ONLY_SCREENS = ['seed', 'start'];
+let activeScreen = 'seed';
+
+function showScreen(n) {
+  activeScreen = n;
+  Object.entries(screens).forEach(([k,el]) => el.classList.toggle('hidden', k!==n));
+  checkOrientation();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MANIFEST
+// ═══════════════════════════════════════════════════════════════
+async function loadManifest() {
+  $('loading-overlay').classList.add('show');
+  try {
+    const res = await fetch(MANIFEST);
+    if (!res.ok) throw new Error('manifest.json não encontrado');
+    const data = await res.json();
+    CHARS = [];
+    (data.homens   || []).forEach(n => CHARS.push({ name: capitalize(n), folder: 'homens',   file: n }));
+    (data.mulheres || []).forEach(n => CHARS.push({ name: capitalize(n), folder: 'mulheres', file: n }));
+    if (!CHARS.length) throw new Error('Nenhum personagem no manifest');
+  } catch(e) {
+    alert('Erro ao carregar personagens:\n' + e.message);
+  } finally {
+    $('loading-overlay').classList.remove('show');
+  }
+}
+function imgPath(char) { return `${IMG_BASE}/${char.folder}/${char.file}.webp`; }
+
+// ═══════════════════════════════════════════════════════════════
+// SEED SCREEN
+// ═══════════════════════════════════════════════════════════════
+function renderSeedScreen() {
+  $('seed-display').textContent = seedToCode(currentSeed);
+  $('seed-input').value = '';
+  $('seed-error').textContent = '';
+}
+
+$('btn-new-seed').addEventListener('click', () => { currentSeed = randomSeed(); renderSeedScreen(); });
+
+$('btn-use-seed').addEventListener('click', () => {
+  const raw = $('seed-input').value.trim().toUpperCase();
+  if (raw.length !== 6) { $('seed-error').textContent = 'O código precisa ter 6 caracteres.'; return; }
+  const s = codeToSeed(raw);
+  if (s === null) { $('seed-error').textContent = 'Código inválido. Use letras e números.'; return; }
+  currentSeed = s;
+  $('seed-display').textContent = raw;
+  $('seed-error').textContent = '';
+  $('seed-input').value = '';
+});
+
+$('btn-confirm-seed').addEventListener('click', () => {
+  if (!CHARS.length) { alert('Personagens ainda carregando…'); return; }
+  pickSecret(); showScreen('start');
+});
+
+// ═══════════════════════════════════════════════════════════════
+// PERSONAGEM SECRETO
+// ═══════════════════════════════════════════════════════════════
+function getSelectedChars() {
+  const rng = makePRNG(currentSeed);
+  const homens   = CHARS.filter(c => c.folder === 'homens');
+  const mulheres = CHARS.filter(c => c.folder === 'mulheres');
+  const picked12 = (pool) => seededShuffle(pool, makePRNG(rng() * 2147483647 >>> 0)).slice(0, 12);
+  return [...picked12(homens), ...picked12(mulheres)];
+}
+
+function pickSecret() {
+  const selected = getSelectedChars();
+  secretChar = selected[Math.floor(Math.random() * selected.length)];
+  const code = seedToCode(currentSeed);
+  const path = imgPath(secretChar);
+
+  // tela start
+  $('active-seed-badge').textContent = `CÓDIGO: ${code}`;
+  $('start-face-img').src = path;
+  $('start-char-name').textContent = secretChar.name;
+
+  // top bar (portrait)
+  $('top-face-img').src   = path;
+  $('top-char-name').textContent = secretChar.name;
+  $('top-seed-badge').textContent = code;
+
+  // side panel (landscape)
+  $('panel-face-img').src = path;
+  $('panel-char-name').textContent = secretChar.name;
+  $('panel-seed-badge').textContent = code;
+}
+
+$('btn-reshuffle').addEventListener('click', pickSecret);
+
+// ═══════════════════════════════════════════════════════════════
+// TABULEIRO — seed determinística
+// ═══════════════════════════════════════════════════════════════
+function updateCounters() {
+  const rem = gameTotal - eliminated.size;
+  // portrait
+  $('counter-val').textContent = rem;
+  $('counter-of').textContent  = `de ${gameTotal}`;
+  // landscape
+  $('counter-val-land').textContent = rem;
+  $('counter-of-land').textContent  = `de ${gameTotal}`;
+}
+
+function buildGrid() {
+  const grid = $('face-grid');
+  grid.innerHTML = '';
+  eliminated.clear();
+
+  // Pega os 24 personagens determinísticos da seed e embaralha para o grid
+  const rng      = makePRNG(currentSeed + 1); // +1 para embaralhamento do grid ser independente
+  const shuffled = seededShuffle(getSelectedChars(), rng);
+
+  gameTotal = shuffled.length;
+  updateCounters();
+
+  // game é sempre landscape: grade 8×3
+  const cols = 8;
+  const rows = Math.ceil(gameTotal / cols);
+  grid.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+  grid.style.gridTemplateRows    = `repeat(${rows},1fr)`;
+  // container query para font-size do nome
+  grid.style.containerType = 'inline-size';
+
+  shuffled.forEach(char => {
+    const card = document.createElement('div');
+    card.className = 'face-card';
+
+    const img = document.createElement('img');
+    img.src = imgPath(char); img.alt = char.name; img.loading = 'lazy';
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'face-card-name';
+    nameDiv.textContent = char.name;
+
+    card.appendChild(img);
+    card.appendChild(nameDiv);
+
+    const toggle = e => {
+      if (e.cancelable) e.preventDefault();
+      eliminated.has(char.name) ? (eliminated.delete(char.name), card.classList.remove('elim'))
+                                 : (eliminated.add(char.name),    card.classList.add('elim'));
+      updateCounters();
+    };
+    card.addEventListener('touchstart', toggle, { passive: false });
+    card.addEventListener('click', toggle);
+    grid.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOTÕES
+// ═══════════════════════════════════════════════════════════════
+$('btn-start').addEventListener('click', () => { buildGrid(); showScreen('game'); });
+
+// win — portrait e landscape → volta para o menu
+['btn-win','btn-win-land'].forEach(id => {
+  const el = $(id); if (!el) return;
+  el.addEventListener('click', () => { renderSeedScreen(); showScreen('seed'); });
+  el.addEventListener('touchstart', e => { e.preventDefault(); renderSeedScreen(); showScreen('seed'); }, { passive: false });
+});
+
+// menu — portrait e landscape
+['btn-menu','btn-menu-land'].forEach(id => {
+  const el = $(id); if (!el) return;
+  el.addEventListener('click', () => { renderSeedScreen(); showScreen('seed'); });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// ORIENTATION LOCK — telas 0/1 só na vertical · tela 2 só na horizontal
+// ═══════════════════════════════════════════════════════════════
+function checkOrientation() {
+  const isLandscape = window.innerWidth > window.innerHeight;
+  const needsPortrait   = PORTRAIT_ONLY_SCREENS.includes(activeScreen);
+  const needsLandscape  = activeScreen === 'game';
+  const showOverlay = (needsPortrait && isLandscape) || (needsLandscape && !isLandscape);
+  $('rotate-overlay').classList.toggle('show', showOverlay);
+  // ajusta ícone e texto conforme o caso
+  if (showOverlay) {
+    $('rotate-icon').textContent = needsLandscape ? '📱' : '📱';
+    $('rotate-txt').textContent  = needsLandscape ? 'Vire o celular!' : 'Vire o celular!';
+    $('rotate-sub').textContent  = needsLandscape ? 'Esta tela funciona só na horizontal' : 'Esta tela funciona só na vertical';
+  }
+}
+
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 100));
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+(async () => {
+  await loadManifest();
+  renderSeedScreen();
+  showScreen('seed');
+})();
+</script>
+</body>
+</html>
